@@ -1,9 +1,16 @@
 from fastapi import FastAPI, Path
 from typing import Optional
-
+from pydantic import BaseModel
 
 # uvicorn working:app --reload
 app = FastAPI()
+
+class Item(BaseModel):
+    name : str
+
+    price : float 
+
+    brand : Optional[str] = None
 
 @app.get("/")
 def home():
@@ -40,3 +47,8 @@ def get_item(*, item_id:int, Name: Optional[str] = None, test: int=None):
             return inventory[item_id]
         
     return {"Data" : "Not Found"}
+
+
+@app.post("/create-item")
+def create_item(item : Item):
+    return {}
