@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path
+from fastapi import FastAPI, Path, Query
 from typing import Optional
 from pydantic import BaseModel
 
@@ -9,6 +9,11 @@ class Item(BaseModel):
     name : str
     price : float 
     brand : Optional[str] = None
+
+class UpdateItem(BaseModel):
+    name : Optional[str] = None 
+    price : Optional[float] = None 
+    brand : Optional[str] = None 
 
 @app.get("/")
 def home():
@@ -65,3 +70,53 @@ def create_item(item_id:int, item : Item):
         return "Error! The ID already exist"
     inventory[item_id] = item
     return inventory[item_id]
+
+
+@app.put("/update-item/{item_id}")
+def update_item(item_id: int, item:UpdateItem):
+    if item_id not in inventory:
+        return "Error! The ID do not Exist"
+    
+    if item.name != None:
+        inventory[item_id].name = item.name 
+
+    if item.price != None:
+        inventory[item_id].price = item.price 
+
+    if item.brand != None:
+        inventory[item_id].brand = item.brand 
+    
+    return inventory[item_id]
+
+@app.delete("/delete-item")
+def delete_item(item_id:int = Query(..., description="The ID of the item to DELETE", gt=0)):
+    if item_id not in inventory:
+        return "Error! The ID of the Item Doesn't Exist"
+    
+    del inventory[item_id]
+    return {"Success": "Item Deleted"}
+
+
+
+'''
+Small Documents for Query Parameters
+
+from fastapi import Depends, FastAPI, Query
+
+app = FastAPI()
+
+
+class CustomQueryParams:
+    def __init__(
+        self,
+        foo: str = Query(..., description="Cool Description for foo"),
+        bar: str = Query(..., description="Cool Description for bar"),
+    ):
+        self.foo = foo
+        self.bar = bar
+
+
+@app.get("/test-query/")
+async def get_by_query(params: CustomQueryParams = Depends()):
+    return params
+'''
